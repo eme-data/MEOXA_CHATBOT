@@ -73,7 +73,7 @@ sleep 5
 # 4. Obtain SSL certificate
 # =============================================================
 log "Obtention du certificat SSL via Let's Encrypt..."
-docker compose run --rm --profile ssl certbot certonly \
+docker compose run --rm certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email "$CERTBOT_EMAIL" \
@@ -108,7 +108,7 @@ fi
 # 6. Setup auto-renewal cron
 # =============================================================
 log "Configuration du renouvellement automatique du certificat..."
-CRON_CMD="0 3 * * * cd $INSTALL_DIR && docker compose run --rm --profile ssl certbot renew --quiet && docker compose exec nginx nginx -s reload"
+CRON_CMD="0 3 * * * cd $INSTALL_DIR && docker compose run --rm certbot renew --quiet && docker compose exec nginx nginx -s reload"
 
 # Add to crontab if not already present
 (crontab -l 2>/dev/null | grep -v "meoxa.*certbot"; echo "$CRON_CMD") | crontab -
