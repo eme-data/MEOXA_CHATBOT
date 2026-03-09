@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meoxa Chatbot - Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+    /* --- Layout --- */
+    .header {
+      background: #1e293b;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 20px; font-weight: 700; }
+    .header .api-key-area { display: flex; gap: 8px; align-items: center; }
+    .header input {
+      background: #334155;
+      border: 1px solid #475569;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      width: 250px;
+    }
+    .header button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card h2 { font-size: 16px; margin-bottom: 16px; color: #334155; }
+    /* --- Buttons --- */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    /* --- Table --- */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+    th { font-weight: 600; color: #64748b; font-size: 12px; text-transform: uppercase; }
+    /* --- Forms --- */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: #475569; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    /* --- Modal --- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      width: 500px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal h3 { margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+    /* --- Badge --- */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-gray { background: #f1f5f9; color: #64748b; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    /* --- Embed code --- */
+    .embed-code {
+      background: #1e293b;
+      color: #a5f3fc;
+      padding: 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      word-break: break-all;
+      cursor: pointer;
+      position: relative;
+    }
+    .embed-code:hover::after {
+      content: "Cliquez pour copier";
+      position: absolute;
+      top: -28px;
+      right: 0;
+      background: #334155;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    /* --- Tabs --- */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .tab {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 2px solid transparent;
+      color: #64748b;
+    }
+    .tab.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: 600; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    /* --- Toast --- */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 9999;
+      display: none;
+    }
+    .toast.show { display: block; }
+    /* --- Empty state --- */
+    .empty { text-align: center; padding: 40px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Meoxa Chatbot</h1>
+  <div class="api-key-area">
+    <input type="password" id="apiKeyInput" placeholder="Admin API Key" />
+    <button onclick="connect()">Connexion</button>
+  </div>
+</div>
+
+<div class="container" id="mainContent" style="display:none;">
+
+  <!-- Tenants list -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0;">Clients (Tenants)</h2>
+      <button class="btn btn-primary" onclick="openTenantModal()">+ Nouveau client</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nom</th>
+          <th>Telegram</th>
+          <th>Claude AI</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tenantsTable"></tbody>
+    </table>
+    <div id="tenantsEmpty" class="empty" style="display:none;">
+      Aucun client configuré. Cliquez sur "+ Nouveau client" pour commencer.
+    </div>
+  </div>
+
+  <!-- Tenant detail (shown when a tenant is selected) -->
+  <div id="tenantDetail" style="display:none;">
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('rules')">Réponses scriptées</button>
+      <button class="tab" onclick="switchTab('knowledge')">Contenu du site</button>
+      <button class="tab" onclick="switchTab('embed')">Code d'intégration</button>
+      <button class="tab" onclick="switchTab('test')">Tester</button>
+    </div>
+
+    <!-- Rules tab -->
+    <div class="tab-content active" id="tab-rules">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2 style="margin:0;" id="rulesTitle">Réponses scriptées</h2>
+          <button class="btn btn-primary" onclick="openRuleModal()">+ Nouvelle règle</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Patterns</th><th>Réponse</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="rulesTable"></tbody>
+        </table>
+        <div id="rulesEmpty" class="empty" style="display:none;">Aucune règle. Ajoutez-en une !</div>
+      </div>
+    </div>
+
+    <!-- Knowledge tab -->
+    <div class="tab-content" id="tab-knowledge">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2 style="margin:0;">Contenu du site</h2>
+          <button class="btn btn-primary" onclick="openKnowledgeModal()">+ Ajouter du contenu</button>
+        </div>
+        <p style="font-size:13px; color:#64748b; margin-bottom:16px;">
+          Ajoutez le contenu du site de votre client (FAQ, pages, produits...). Le chatbot ne répondra qu'en se basant sur ce contenu.
+        </p>
+        <table>
+          <thead>
+            <tr><th>Titre</th><th>Catégorie</th><th>Contenu (extrait)</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="knowledgeTable"></tbody>
+        </table>
+        <div id="knowledgeEmpty" class="empty" style="display:none;">Aucun contenu. Le chatbot utilisera uniquement les réponses scriptées.</div>
+      </div>
+    </div>
+
+    <!-- Embed tab -->
+    <div class="tab-content" id="tab-embed">
+      <div class="card">
+        <h2>Code d'intégration</h2>
+        <p style="margin-bottom:12px; font-size:14px; color:#64748b;">
+          Copiez ce code et collez-le juste avant la balise <code>&lt;/body&gt;</code> du site de votre client.
+        </p>
+        <div class="embed-code" id="embedCode" onclick="copyEmbed()"></div>
+      </div>
+    </div>
+
+    <!-- Test tab -->
+    <div class="tab-content" id="tab-test">
+      <div class="card">
+        <h2>Tester le chatbot</h2>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <input type="text" id="testInput" placeholder="Tapez un message..." style="flex:1; padding:8px 12px; border:1px solid #d1d5db; border-radius:6px;" />
+          <button class="btn btn-primary" onclick="testMessage()">Envoyer</button>
+        </div>
+        <div id="testMessages" style="background:#f8fafc; border-radius:8px; padding:16px; min-height:200px;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Tenant Modal -->
+<div class="modal-overlay" id="tenantModal">
+  <div class="modal">
+    <h3 id="tenantModalTitle">Nouveau client</h3>
+    <form onsubmit="saveTenant(event)">
+      <input type="hidden" id="tenantEditId" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>ID (unique, sans espaces)</label>
+          <input type="text" id="tenantIdInput" required pattern="[a-zA-Z0-9_-]+" />
+        </div>
+        <div class="form-group">
+          <label>Nom</label>
+          <input type="text" id="tenantNameInput" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Token Telegram (optionnel)</label>
+        <input type="text" id="tenantTelegramInput" placeholder="123456:ABC-DEF..." />
+      </div>
+      <div class="form-group">
+        <label>Clé API Claude (optionnel)</label>
+        <input type="password" id="tenantClaudeInput" placeholder="sk-ant-..." />
+      </div>
+      <div class="form-group">
+        <label>Modèle Claude</label>
+        <select id="tenantModelInput">
+          <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
+          <option value="claude-opus-4-6">Claude Opus 4.6</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>System prompt</label>
+        <textarea id="tenantPromptInput" placeholder="Tu es un assistant utile et professionnel."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeTenantModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Rule Modal -->
+<div class="modal-overlay" id="ruleModal">
+  <div class="modal">
+    <h3 id="ruleModalTitle">Nouvelle règle</h3>
+    <form onsubmit="saveRule(event)">
+      <input type="hidden" id="ruleEditIndex" value="-1" />
+      <div class="form-group">
+        <label>Patterns (un par ligne - expressions régulières)</label>
+        <textarea id="rulePatternsInput" rows="4" placeholder="bonjour&#10;salut&#10;hello"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Réponse</label>
+        <textarea id="ruleResponseInput" rows="3" placeholder="Bonjour ! Comment puis-je vous aider ?"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeRuleModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Knowledge Modal -->
+<div class="modal-overlay" id="knowledgeModal">
+  <div class="modal">
+    <h3 id="knowledgeModalTitle">Ajouter du contenu</h3>
+    <form onsubmit="saveKnowledge(event)">
+      <input type="hidden" id="knowledgeEditId" value="-1" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Titre</label>
+          <input type="text" id="knowledgeTitleInput" required placeholder="Ex: Politique de retour" />
+        </div>
+        <div class="form-group">
+          <label>Catégorie</label>
+          <input type="text" id="knowledgeCategoryInput" value="general" placeholder="Ex: faq, produit, service..." />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Contenu</label>
+        <textarea id="knowledgeContentInput" rows="6" required placeholder="Collez ici le contenu de la page, FAQ, description produit..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeKnowledgeModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let API_KEY = "";
+  let BASE_URL = window.location.origin;
+  let currentTenantId = null;
+
+  // --- Auth ---
+  function connect() {
+    API_KEY = document.getElementById("apiKeyInput").value;
+    if (!API_KEY) return showToast("Entrez une clé API");
+    loadTenants();
+  }
+
+  function headers() {
+    return { "Content-Type": "application/json", "X-API-Key": API_KEY };
+  }
+
+  async function apiFetch(path, opts = {}) {
+    opts.headers = { ...headers(), ...(opts.headers || {}) };
+    const res = await fetch(BASE_URL + path, opts);
+    if (res.status === 403) { showToast("Clé API invalide"); throw new Error("403"); }
+    if (!res.ok) { const e = await res.json().catch(() => ({})); showToast(e.detail || "Erreur"); throw new Error(res.status); }
+    return res.json();
+  }
+
+  // --- Tenants ---
+  async function loadTenants() {
+    try {
+      const data = await apiFetch("/api/tenants");
+      document.getElementById("mainContent").style.display = "block";
+      renderTenants(data.tenants);
+    } catch (e) { /* handled */ }
+  }
+
+  function renderTenants(tenants) {
+    const tbody = document.getElementById("tenantsTable");
+    const empty = document.getElementById("tenantsEmpty");
+    if (!tenants.length) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    tbody.innerHTML = tenants.map(t => `
+      <tr>
+        <td><strong>${t.tenant_id}</strong></td>
+        <td>${t.name}</td>
+        <td>${t.has_telegram ? '<span class="badge badge-green">Actif</span>' : '<span class="badge badge-gray">Non</span>'}</td>
+        <td>${t.has_claude ? '<span class="badge badge-blue">Actif</span>' : '<span class="badge badge-gray">Non</span>'}</td>
+        <td>${t.enabled !== false ? '<span class="badge badge-green">Actif</span>' : '<span class="badge badge-gray">Inactif</span>'}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="selectTenant('${t.tenant_id}')">Gérer</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteTenant('${t.tenant_id}')">Suppr.</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function openTenantModal(editId) {
+    document.getElementById("tenantModal").classList.add("open");
+    if (editId) {
+      document.getElementById("tenantModalTitle").textContent = "Modifier le client";
+      document.getElementById("tenantEditId").value = editId;
+      document.getElementById("tenantIdInput").value = editId;
+      document.getElementById("tenantIdInput").disabled = true;
+    } else {
+      document.getElementById("tenantModalTitle").textContent = "Nouveau client";
+      document.getElementById("tenantEditId").value = "";
+      document.getElementById("tenantIdInput").value = "";
+      document.getElementById("tenantIdInput").disabled = false;
+    }
+  }
+
+  function closeTenantModal() {
+    document.getElementById("tenantModal").classList.remove("open");
+    document.getElementById("tenantEditId").value = "";
+    document.getElementById("tenantIdInput").disabled = false;
+    document.getElementById("tenantNameInput").value = "";
+    document.getElementById("tenantTelegramInput").value = "";
+    document.getElementById("tenantClaudeInput").value = "";
+    document.getElementById("tenantPromptInput").value = "";
+  }
+
+  async function saveTenant(e) {
+    e.preventDefault();
+    const editId = document.getElementById("tenantEditId").value;
+    const body = {
+      tenant_id: document.getElementById("tenantIdInput").value,
+      name: document.getElementById("tenantNameInput").value,
+      telegram_token: document.getElementById("tenantTelegramInput").value || null,
+      claude_api_key: document.getElementById("tenantClaudeInput").value || null,
+      claude_model: document.getElementById("tenantModelInput").value,
+      system_prompt: document.getElementById("tenantPromptInput").value || "Tu es un assistant utile et professionnel.",
+    };
+    try {
+      if (editId) {
+        await apiFetch(`/api/tenants/${editId}`, { method: "PUT", body: JSON.stringify(body) });
+      } else {
+        await apiFetch("/api/tenants", { method: "POST", body: JSON.stringify(body) });
+      }
+      closeTenantModal();
+      showToast("Client enregistré !");
+      loadTenants();
+    } catch (e) { /* handled */ }
+  }
+
+  async function deleteTenant(id) {
+    if (!confirm(`Supprimer le client "${id}" ?`)) return;
+    try {
+      await apiFetch(`/api/tenants/${id}`, { method: "DELETE" });
+      if (currentTenantId === id) { currentTenantId = null; document.getElementById("tenantDetail").style.display = "none"; }
+      showToast("Client supprimé");
+      loadTenants();
+    } catch (e) { /* handled */ }
+  }
+
+  // --- Tenant detail ---
+  async function selectTenant(id) {
+    currentTenantId = id;
+    document.getElementById("tenantDetail").style.display = "block";
+    document.getElementById("rulesTitle").textContent = `Réponses scriptées — ${id}`;
+    updateEmbedCode();
+    switchTab("rules");
+    loadRules();
+  }
+
+  // --- Tabs ---
+  function switchTab(name) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    event.target.classList.add("active");
+    document.getElementById("tab-" + name).classList.add("active");
+    if (name === "knowledge") loadKnowledge();
+    if (name === "rules") loadRules();
+  }
+
+  // --- Rules ---
+  async function loadRules() {
+    try {
+      const data = await apiFetch(`/api/tenants/${currentTenantId}/rules`);
+      renderRules(data.rules);
+    } catch (e) { /* handled */ }
+  }
+
+  function renderRules(rules) {
+    const tbody = document.getElementById("rulesTable");
+    const empty = document.getElementById("rulesEmpty");
+    if (!rules.length) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    tbody.innerHTML = rules.map((r, i) => `
+      <tr>
+        <td><code>${r.patterns.join(", ")}</code></td>
+        <td>${r.response.substring(0, 80)}${r.response.length > 80 ? "..." : ""}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick='editRule(${i}, ${JSON.stringify(JSON.stringify(r))})'>Modifier</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRule(${i})">Suppr.</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function openRuleModal() {
+    document.getElementById("ruleModal").classList.add("open");
+    document.getElementById("ruleModalTitle").textContent = "Nouvelle règle";
+    document.getElementById("ruleEditIndex").value = "-1";
+    document.getElementById("rulePatternsInput").value = "";
+    document.getElementById("ruleResponseInput").value = "";
+  }
+
+  function editRule(index, ruleJson) {
+    const rule = JSON.parse(ruleJson);
+    document.getElementById("ruleModal").classList.add("open");
+    document.getElementById("ruleModalTitle").textContent = "Modifier la règle";
+    document.getElementById("ruleEditIndex").value = index;
+    document.getElementById("rulePatternsInput").value = rule.patterns.join("\n");
+    document.getElementById("ruleResponseInput").value = rule.response;
+  }
+
+  function closeRuleModal() {
+    document.getElementById("ruleModal").classList.remove("open");
+  }
+
+  async function saveRule(e) {
+    e.preventDefault();
+    const index = parseInt(document.getElementById("ruleEditIndex").value);
+    const patterns = document.getElementById("rulePatternsInput").value.split("\n").map(p => p.trim()).filter(Boolean);
+    const response = document.getElementById("ruleResponseInput").value;
+    if (!patterns.length || !response) return showToast("Remplissez tous les champs");
+    try {
+      if (index >= 0) {
+        await apiFetch(`/api/tenants/${currentTenantId}/rules/${index}`, { method: "PUT", body: JSON.stringify({ patterns, response }) });
+      } else {
+        await apiFetch(`/api/tenants/${currentTenantId}/rules`, { method: "POST", body: JSON.stringify({ patterns, response }) });
+      }
+      closeRuleModal();
+      showToast("Règle enregistrée !");
+      loadRules();
+    } catch (e) { /* handled */ }
+  }
+
+  async function deleteRule(index) {
+    if (!confirm("Supprimer cette règle ?")) return;
+    try {
+      await apiFetch(`/api/tenants/${currentTenantId}/rules/${index}`, { method: "DELETE" });
+      showToast("Règle supprimée");
+      loadRules();
+    } catch (e) { /* handled */ }
+  }
+
+  // --- Knowledge base ---
+  async function loadKnowledge() {
+    try {
+      const data = await apiFetch(`/api/tenants/${currentTenantId}/knowledge`);
+      renderKnowledge(data.entries);
+    } catch (e) { /* handled */ }
+  }
+
+  function renderKnowledge(entries) {
+    const tbody = document.getElementById("knowledgeTable");
+    const empty = document.getElementById("knowledgeEmpty");
+    if (!entries.length) { tbody.innerHTML = ""; empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    tbody.innerHTML = entries.map((e, i) => `
+      <tr>
+        <td><strong>${e.title}</strong></td>
+        <td><span class="badge badge-blue">${e.category}</span></td>
+        <td>${e.content.substring(0, 100)}${e.content.length > 100 ? "..." : ""}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick='editKnowledge(${e.id}, ${JSON.stringify(JSON.stringify(e))})'>Modifier</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteKnowledge(${e.id})">Suppr.</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  function openKnowledgeModal() {
+    document.getElementById("knowledgeModal").classList.add("open");
+    document.getElementById("knowledgeModalTitle").textContent = "Ajouter du contenu";
+    document.getElementById("knowledgeEditId").value = "-1";
+    document.getElementById("knowledgeTitleInput").value = "";
+    document.getElementById("knowledgeCategoryInput").value = "general";
+    document.getElementById("knowledgeContentInput").value = "";
+  }
+
+  function editKnowledge(id, entryJson) {
+    const entry = JSON.parse(entryJson);
+    document.getElementById("knowledgeModal").classList.add("open");
+    document.getElementById("knowledgeModalTitle").textContent = "Modifier le contenu";
+    document.getElementById("knowledgeEditId").value = id;
+    document.getElementById("knowledgeTitleInput").value = entry.title;
+    document.getElementById("knowledgeCategoryInput").value = entry.category;
+    document.getElementById("knowledgeContentInput").value = entry.content;
+  }
+
+  function closeKnowledgeModal() {
+    document.getElementById("knowledgeModal").classList.remove("open");
+  }
+
+  async function saveKnowledge(e) {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("knowledgeEditId").value);
+    const body = {
+      title: document.getElementById("knowledgeTitleInput").value,
+      content: document.getElementById("knowledgeContentInput").value,
+      category: document.getElementById("knowledgeCategoryInput").value || "general",
+    };
+    try {
+      if (id >= 0) {
+        await apiFetch(`/api/tenants/${currentTenantId}/knowledge/${id}`, { method: "PUT", body: JSON.stringify(body) });
+      } else {
+        await apiFetch(`/api/tenants/${currentTenantId}/knowledge`, { method: "POST", body: JSON.stringify(body) });
+      }
+      closeKnowledgeModal();
+      showToast("Contenu enregistré !");
+      loadKnowledge();
+    } catch (e) { /* handled */ }
+  }
+
+  async function deleteKnowledge(id) {
+    if (!confirm("Supprimer ce contenu ?")) return;
+    try {
+      await apiFetch(`/api/tenants/${currentTenantId}/knowledge/${id}`, { method: "DELETE" });
+      showToast("Contenu supprimé");
+      loadKnowledge();
+    } catch (e) { /* handled */ }
+  }
+
+  // --- Embed code ---
+  function updateEmbedCode() {
+    const code = `<script src="${BASE_URL}/widget/${currentTenantId}/embed.js"><\/script>`;
+    document.getElementById("embedCode").textContent = code;
+  }
+
+  function copyEmbed() {
+    navigator.clipboard.writeText(document.getElementById("embedCode").textContent);
+    showToast("Code copié !");
+  }
+
+  // --- Test ---
+  async function testMessage() {
+    const input = document.getElementById("testInput");
+    const text = input.value.trim();
+    if (!text) return;
+    const container = document.getElementById("testMessages");
+    container.innerHTML += `<div style="text-align:right; margin-bottom:8px;"><span style="background:#2563eb;color:white;padding:6px 12px;border-radius:10px;font-size:14px;">${text}</span></div>`;
+    input.value = "";
+    try {
+      const data = await apiFetch(`/api/tenants/${currentTenantId}/test`, { method: "POST", body: JSON.stringify({ message: text }) });
+      container.innerHTML += `<div style="margin-bottom:8px;"><span style="background:#f1f5f9;padding:6px 12px;border-radius:10px;font-size:14px;">${data.response}</span></div>`;
+    } catch (e) {
+      container.innerHTML += `<div style="margin-bottom:8px;color:#ef4444;">Erreur</div>`;
+    }
+    container.scrollTop = container.scrollHeight;
+  }
+
+  document.getElementById("testInput").addEventListener("keypress", e => { if (e.key === "Enter") testMessage(); });
+
+  // --- Toast ---
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 2500);
+  }
+
+  // --- Init: check for saved key ---
+  document.getElementById("apiKeyInput").addEventListener("keypress", e => { if (e.key === "Enter") connect(); });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+.git
+.gitignore
+.env
+__pycache__
+*.pyc
+.vscode
+.idea
+*.md
+docker-compose.override.yml

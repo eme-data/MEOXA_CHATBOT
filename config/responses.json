@@ -1,0 +1,29 @@
+{
+  "default_response": "Désolé, je n'ai pas compris votre demande. Pouvez-vous reformuler ?",
+  "rules": [
+    {
+      "patterns": ["bonjour", "salut", "hello", "hey", "coucou"],
+      "response": "Bonjour ! Comment puis-je vous aider aujourd'hui ?"
+    },
+    {
+      "patterns": ["merci", "thank"],
+      "response": "Avec plaisir ! N'hésitez pas si vous avez d'autres questions."
+    },
+    {
+      "patterns": ["au revoir", "bye", "à bientôt", "a bientot"],
+      "response": "Au revoir ! Bonne journée !"
+    },
+    {
+      "patterns": ["aide", "help", "comment ça marche", "comment ca marche"],
+      "response": "Je suis un assistant automatisé. Posez-moi vos questions et je ferai de mon mieux pour y répondre !"
+    },
+    {
+      "patterns": ["prix", "tarif", "combien", "coût", "cout"],
+      "response": "Pour obtenir des informations sur nos tarifs, veuillez nous contacter directement ou consulter notre site web."
+    },
+    {
+      "patterns": ["contact", "email", "mail", "téléphone", "telephone", "appeler"],
+      "response": "Vous pouvez nous contacter par email ou téléphone. Consultez notre page de contact pour plus d'informations."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  chatbot:
+    build: .
+    container_name: meoxa-chatbot
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./config:/app/config
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
