@@ -45,7 +45,8 @@ apt-get install -y \
     gnupg \
     lsb-release \
     git \
-    ufw
+    ufw \
+    dnsutils
 
 # =============================================================
 # 3. Installation de Docker
@@ -114,7 +115,6 @@ log "Configuration du firewall..."
 ufw allow 22/tcp    # SSH
 ufw allow 80/tcp    # HTTP
 ufw allow 443/tcp   # HTTPS
-ufw allow 8000/tcp  # Meoxa API
 ufw --force enable
 log "Firewall configuré (ports 22, 80, 443, 8000 ouverts)"
 
@@ -124,20 +124,24 @@ log "Firewall configuré (ports 22, 80, 443, 8000 ouverts)"
 log "Build de l'image Docker..."
 docker compose build
 
-log "Démarrage du service..."
+# Use HTTP-only nginx config initially (SSL certs don't exist yet)
+log "Démarrage du service (HTTP)..."
+mkdir -p certbot/www certbot/conf
+cp nginx/nginx-init.conf nginx/active.conf
+
 docker compose up -d
 
 # Attendre que le service soit prêt
 log "Attente du démarrage du service..."
 for i in {1..30}; do
-    if curl -s http://localhost:8000/health > /dev/null 2>&1; then
+    if curl -s http://localhost/health > /dev/null 2>&1; then
         break
     fi
     sleep 1
 done
 
 # Vérification
-if curl -s http://localhost:8000/health | grep -q "ok"; then
+if curl -s http://localhost/health | grep -q "ok"; then
     log "Service démarré avec succès !"
 else
     error "Le service n'a pas démarré correctement. Vérifiez les logs : docker compose logs"
@@ -179,9 +183,9 @@ echo -e "${GREEN}=============================================================${
 echo -e "${GREEN}  Meoxa Chatbot - Installation terminée !${NC}"
 echo -e "${GREEN}=============================================================${NC}"
 echo ""
-echo -e "  ${BLUE}Dashboard admin :${NC}  http://${SERVER_IP}:8000/admin"
-echo -e "  ${BLUE}API :${NC}              http://${SERVER_IP}:8000/docs"
-echo -e "  ${BLUE}Health check :${NC}     http://${SERVER_IP}:8000/health"
+echo -e "  ${BLUE}Dashboard admin :${NC}  http://${SERVER_IP}/admin"
+echo -e "  ${BLUE}API :${NC}              http://${SERVER_IP}/docs"
+echo -e "  ${BLUE}Health check :${NC}     http://${SERVER_IP}/health"
 echo ""
 echo -e "  ${YELLOW}Clé API admin :${NC}    ${ADMIN_KEY}"
 echo ""
@@ -192,9 +196,14 @@ echo -e "    Arrêter :           cd $INSTALL_DIR && docker compose down"
 echo -e "    Mettre à jour :     cd $INSTALL_DIR && git pull && docker compose build && docker compose up -d"
 echo ""
 echo -e "  ${BLUE}Prochaines étapes :${NC}"
-echo -e "    1. Allez sur http://${SERVER_IP}:8000/admin"
+echo -e "    1. Allez sur http://${SERVER_IP}/admin"
 echo -e "    2. Entrez la clé API admin"
 echo -e "    3. Créez votre premier client"
 echo -e "    4. Copiez le code d'intégration sur le site client"
+echo ""
+echo -e "  ${YELLOW}Pour activer HTTPS :${NC}"
+echo -e "    1. Pointez votre domaine DNS vers ${SERVER_IP}"
+echo -e "    2. Editez .env : DOMAIN=votre-domaine.com et CERTBOT_EMAIL=votre@email.com"
+echo -e "    3. Lancez : sudo bash $INSTALL_DIR/setup-ssl.sh"
 echo ""
 echo -e "${GREEN}=============================================================${NC}"

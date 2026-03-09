@@ -5,8 +5,8 @@ services:
     build: .
     container_name: meoxa-chatbot
     restart: unless-stopped
-    ports:
-      - "${PORT:-8000}:8000"
+    expose:
+      - "8000"
     env_file:
       - .env
     volumes:
@@ -14,3 +14,27 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8000
+
+  nginx:
+    image: nginx:alpine
+    container_name: meoxa-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/active.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+    depends_on:
+      - chatbot
+
+  certbot:
+    image: certbot/certbot
+    container_name: meoxa-certbot
+    profiles: ["ssl"]
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt

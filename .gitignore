@@ -27,3 +27,7 @@ Thumbs.db
 
 # Docker
 docker-compose.override.yml
+
+# SSL certificates
+certbot/
+nginx/active.conf
